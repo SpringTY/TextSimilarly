@@ -1,0 +1,140 @@
+/* 版心 */
+.w{
+    width: 1200px;
+    margin: 0 auto;
+}
+
+/* 左浮 */
+.fl{
+    float: left;
+}
+
+/* 右浮 */
+.fr{
+    float: right;
+}
+
+/* 快捷导航栏 */
+.shortcut{
+    height: 31px;
+    line-height: 31px;
+    background-color: #f1f1f1;
+}
+
+/* ul里的li标签根据左侧浮动（在同一行） */
+.shortcut ul li{
+    float: left;
+}
+
+/* 字体变红 */
+.style_blue{
+    color:blue;
+}
+
+/* 头部制作 */
+.header{
+    position: relative;
+    height: 135px;
+    background-color: rgb(243, 239, 231);
+    background-image: url(../image/back1.png);
+}
+
+/* logo插放 */
+.logo{
+    width: 124px;
+    height: 135px;
+    background-color: red;
+}
+
+.logo a{
+    display: block;
+    width: 124px;
+    height: 135px;
+    background: url(../image/logo5.png) no-repeat;
+    /* 京东的做法 */
+    /* font-size: 0; */
+    /* 淘宝的做法让文字隐藏 */
+    text-indent: -999px;
+    overflow: hidden;
+}
+
+.shangchuan{
+    position: absolute;
+    left: 346px;
+    top: 70px;
+    width: 538px;
+    height: 40px;
+    border:2px solid rgb(185, 179, 179);
+    background-color:whitesmoke;
+}
+
+.anniu{
+    position: absolute;
+    top: 10px;
+    left: 50px;
+    display: inline;
+}
+
+.busubmit{
+    position: absolute;
+    top: 10px;
+    left: 500px;
+    display: inline; 
+    color:black;/*字体颜色*/
+	background-color:rgb(134, 149, 177));/*按钮背景颜色*/
+	border-radius: 3px;/*让按钮变得圆滑一点*/
+	border-width: 0;/*消去按钮丑的边框*/
+	argin: 0;
+	outline: none;/*取消轮廓*/
+	font-family: KaiTi;/*字体设置为楷体*/
+	font-size: 17px;/*设置字体大小*/
+	text-align: center;/*字体居中*/
+	cursor: pointer;/*设置鼠标箭头手势*/
+
+}
+
+.busubmit:hover{/*鼠标移动时的颜色变化*/
+    background-color: antiquewhite;
+}
+
+.nav{
+    height: 47px;
+    border-bottom: 2px solid rgb(185, 179, 179);
+}
+
+.nav .dropdown{
+    float: left;
+    width: 210px;
+    height: 45px;
+    background-color: rgb(227, 231, 240);
+}
+
+.caidan{
+    position: relative;
+    width: 45px;
+    height: 45px;
+    background-image: url(../image/caidan.png);
+    background-position: center;
+    left: 15px;
+    top: 3px;
+}
+
+.dropdown .func{
+    position: relative;
+    width: 210px;
+    height: 465px;
+    background-color:rgb(227, 231, 240);
+    top: 10px; 
+    /* left: 168px;
+    top: 218px;    */
+}
+
+.options{
+    width: 210px;
+    height: 65px;
+    background-color: rgb(227, 231, 240);
+    text-align: center;
+    line-height: 20px;
+    font-size: 16px;
+    font-family: KaiTi;
+}
