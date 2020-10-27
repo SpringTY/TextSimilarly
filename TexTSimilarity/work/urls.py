@@ -15,11 +15,16 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import router
-from .views import fileView
+from TexTSimilarity.work.views import router, fileView
+from .views import taskView
 
 urlpatterns = [
+    path('', router.index, name='index_base'),
     path('admin/', admin.site.urls),
     path('index/', router.index, name='index'),
-    path('textFiles/', fileView.textFiles, name='upload')
+    path('textFiles/', fileView.textFiles, name='upload'),
+    path('mysqlTest/', fileView.mysqlTest, name='mysqlTest'),
+    path('tasks/', taskView.tasks, name='tasks'),
+    path('files/', fileView.files, name='files'),
+    path('upload/', fileView.upload, name='upload'),
 ]

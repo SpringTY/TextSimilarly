@@ -79,9 +79,9 @@
     position: absolute;
     top: 10px;
     left: 500px;
-    display: inline; 
+    display: inline;
     color:black;/*字体颜色*/
-	background-color:rgb(134, 149, 177));/*按钮背景颜色*/
+	background-color:rgb(134, 149, 177);/*按钮背景颜色*/
 	border-radius: 3px;/*让按钮变得圆滑一点*/
 	border-width: 0;/*消去按钮丑的边框*/
 	argin: 0;

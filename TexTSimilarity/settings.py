@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'TexTSimilarity.work'
 ]
 
 MIDDLEWARE = [
@@ -47,7 +48,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'TexTSimilarity.urls'
+ROOT_URLCONF = 'TexTSimilarity.work.urls'
 
 TEMPLATES = [
     {
@@ -125,3 +126,13 @@ STATICFILES_DIRS = (
     # ('images', os.path.join(STATIC_ROOT, 'images').replace('\\', '/')),
     # ('font', os.path.join(STATIC_ROOT, 'font').replace('\\', '/')),
 )
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',   # 数据库引擎
+        'NAME': 'textSimilarity',  # 数据库名，先前创建的
+        'USER': 'root',     # 用户名，可以自己创建用户
+        'PASSWORD': '123456',  # 密码
+        'HOST': '47.98.177.164',  # mysql服务所在的主机ip
+        'PORT': '3306',         # mysql服务端口
+    }
+}
