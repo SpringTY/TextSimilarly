@@ -4,16 +4,14 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 from TexTSimilarity.work.models.models import CMSFile, CMSTask, CMSResult
 from django.core.files.storage import default_storage
+from TexTSimilarity.work.utils.constValues import *
 
 
-@require_POST
+@require_GET
 def textFiles(request):
-    if request.FILES is not None:
-        for i in request.FILES:
-            my_file = request.FILES[i]
-            print(my_file.name)
-    else:
-        print("None")
+    cmsFile = CMSFile.create('name', 'path', 1, 1)
+    cmsFile.save()
+    print(cmsFile.cmsFileId)
     return HttpResponse('ok')
 
 
@@ -27,19 +25,29 @@ def mysqlTest(request):
 
 @require_GET
 def files(request):
-    cms_file = CMSFile.objects.all()
-    cms_file_json = serializers.serialize("json", cms_file)
-    return HttpResponse(cms_file_json)
+    cmsFile = CMSFile.objects.all()
+    cmsFileJSON = serializers.serialize("json", cmsFile)
+    return HttpResponse(cmsFileJSON)
 
-'''
- 明天需要把结果写入数据库,还需要搞一搞分析结果
-'''
+
 @require_POST
 def upload(request):
     if request.FILES is not None:
-        for my_file in request.FILES.getlist('cmsfile'):
-            print('upload_files/' + my_file.name)
-            default_storage.save('upload_files/' + my_file.name, ContentFile(my_file.read()))
+        cmsTaskName = request.POST.get('cmsTaskName')
+
+        cmsTask = CMSTask.create(cmsTaskName=cmsTaskName, cmsTaskStatus=CMSTaskStatus.CREATED)
+        cmsTask.save()
+        cmsTaskId = cmsTask.cmsTaskId
+        cmsTaskStart = cmsTask.cmsTaskStart
+
+        for cmsRequestFile in request.FILES.getlist('cmsFile'):
+            cmsFilePath = FILE_PATH_PREFIX + str(cmsTaskStart.strftime('%Y-%m-%d-%H-%M-%S')) + '/'
+            print(cmsFilePath)
+            default_storage.save(cmsFilePath + cmsRequestFile.name, ContentFile(cmsRequestFile.read()))
+            cmsFile = CMSFile.create(cmsFileName=cmsRequestFile.name, cmsFilePath=cmsFilePath, cmsTaskId=cmsTaskId,
+                                     cmsFileStatus=CMSFileStatus.ON_DISK)
+            cmsFile.save()
+        responseMSG = 'success'
     else:
-        print("None")
-    return HttpResponse('ok')
+        responseMSG = 'failed'
+    return HttpResponse(responseMSG)

@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from TexTSimilarity.work.views import router, fileView
-from .views import taskView
+from .views import taskView, resultView
 
 urlpatterns = [
     path('', router.index, name='index_base'),
@@ -27,4 +27,7 @@ urlpatterns = [
     path('tasks/', taskView.tasks, name='tasks'),
     path('files/', fileView.files, name='files'),
     path('upload/', fileView.upload, name='upload'),
+    path('run/task', taskView.runTask, name='runTask'),
+    path('result', router.result, name='result'),
+    path('resultInfo', resultView.resultInfo, name='resultInfo'),
 ]

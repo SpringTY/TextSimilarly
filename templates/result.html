@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>insis作业查重系统</title>
+    <!-- 引入bootstrapCSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <!-- 引入初始化样式文件 -->
+    <link rel="stylesheet" href="/static/css/base.css">
+    <!-- 引入公共样式的样式文件 -->
+    <link rel="stylesheet" href="/static/css/common.css">
+    <!-- 引入favicon图标 -->
+    <link rel="shortcut icon" href="/static/favicon.ico"/>
+    <!-- 引入主体模块样式文件 -->
+    <link rel="stylesheet" href="/static/css/index.css">
+    <!-- MQQ add -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
+    <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+            src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@4.9.0/dist/echarts.min.js"></script>
+</head>
+<body>
+<!-- 快捷导航模块 -->
+<section class="shortcut">
+    <div class="w">
+        <div class="fl">
+            <ul>
+                <li>欢迎使用查重系统！</li>
+            </ul>
+        </div>
+        <div class="fr">
+            <a href="http://insis.bjtu.edu.cn/index.html" class="style_blue">insis主页</a>
+        </div>
+    </div>
+</section>
+
+<!-- 上传文件夹模块 -->
+<header class="header w">
+    <!-- 上传模块 -->
+    <input id="cmsTaskId" hidden value="{{ cmsTaskId }}">
+    <div class="shangchuan">
+        <form method="post" enctype="multipart/form-data" action="/upload/">
+            {% csrf_token %}
+            <label>上传文件</label>
+            <input type="file" name="cmsFile" multiple="multiple" id="exampleFormControlFile1">
+            <label>任务名</label>
+            <input type="text" name="cmsTaskName" id="cmsTaskName">
+            <button type="submit" class="busubmit">提交</button>
+        </form>
+    </div>
+    <!-- logo模块 -->
+    <div class="logo">
+        <h1>
+            <a href="pass" title="INSIS作业查重系统">作业查重系统</a>
+        </h1>
+    </div>
+
+
+</header>
+
+<!-- 菜单模块制作 -->
+<nav class="nav">
+    <div class="w">
+        <div class="dropdown">
+            <div class="caidan"></div>
+            <div class="func">
+                <ul>
+                    <li class="options"></li>
+                    <li class="options">
+                        <a href="/index">任务</a>
+                    </li>
+                    <li class="options">
+                        <a href="#">检查结果</a>
+                    </li>
+                    <li class="options">
+                        <a href="#">重复率拓扑</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- 主题模块 -->
+<div class="w">
+    <div class="main">
+        <div id="charts" style="height: 600px;margin-bottom: 20px"></div>
+        <div style="background: white;height:20px"></div>
+        <h5>{{ cmsTask.cmsTaskName }}(id={{ cmsTask.cmsTaskId }})</h5>
+        <div style="height: 100%;margin-bottom: 60px">
+            <table id="task_table">
+                <thead>
+                <tr>
+                    <th scope="col">文档1</th>
+                    <th scope="col">文档2</th>
+                    <th scope="col">重复率</th>
+                </tr>
+                </thead>
+            </table>
+
+        </div>
+
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+    let valt = $('#cmsTaskId').val();
+    let similarData = null;
+    $.ajax({
+        url: '/resultInfo',
+        data: {cmsTaskId: valt},
+        type: "GET",
+        async: false,
+        success: function (resp) {
+            console.log(resp)
+            similarData = JSON.parse(resp)
+        }
+    })
+    let fileNames = similarData['docNameList']
+    let gate = 0.9
+    let similar = similarData['similarity']
+    var myChart = echarts.init(document.getElementById('charts'));
+
+    option = {
+        title: {
+            text: '拓扑图'
+        },
+        tooltip: {},
+        animationDurationUpdate: 1500,
+        animationEasingUpdate: 'quinticInOut',
+        series: [
+            {
+                type: 'graph',
+                layout: 'none',
+                symbolSize: 50,
+                roam: true,
+                label: {
+                    show: true
+                },
+                edgeSymbol: ['circle'],
+                edgeSymbolSize: [4, 10],
+                edgeLabel: {
+                    fontSize: 20
+                },
+                data: [{
+                    name: '节点1',
+                    x: 300,
+                    y: 300
+                }, {
+                    name: '节点2',
+                    x: 800,
+                    y: 300
+                }, {
+                    name: '节点3',
+                    x: 550,
+                    y: 100
+                }, {
+                    name: '节点4',
+                    x: 550,
+                    y: 500
+                }],
+                // links: [],
+                links: [{
+                    source: 0,
+                    target: 1,
+                    symbolSize: [5, 20],
+                    label: {
+                        show: true
+                    },
+                    lineStyle: {
+                        width: 5,
+                        curveness: 0.2
+                    }
+                }, {
+                    source: '节点2',
+                    target: '节点1',
+                    label: {
+                        show: true
+                    },
+                    lineStyle: {
+                        curveness: 0.2
+                    }
+                }, {
+                    source: '节点1',
+                    target: '节点3'
+                }, {
+                    source: '节点2',
+                    target: '节点3'
+                }, {
+                    source: '节点2',
+                    target: '节点4'
+                }, {
+                    source: '节点1',
+                    target: '节点4'
+                }],
+                lineStyle: {
+                    opacity: 0.9,
+                    width: 2,
+                    curveness: 0
+                }
+            }
+        ]
+    };
+
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+    let cmsTaskStatus = {
+        0: '创建，未运行',
+        1: '判断中',
+        2: '已完成'
+    }
+    function initTable() {
+        $('#task_table').DataTable({
+                orderMulti: true,
+                columns: [
+                    {data: 'docx1'},
+                    {data: 'docx2'},
+                    {data: 'similar'},
+                ],
+            }
+        );
+    }
+
+    function fleshTable(cur_data) {
+        let table = $('#task_table').DataTable();
+        table.clear();
+        table.rows.add(cur_data)
+        table.draw()
+    }
+
+    function transformData() {
+        let items = []
+        similar.forEach(
+            (item) => {
+                if (parseFloat(item['similarity']) >= gate) {
+                    items.push({
+                        docx1: fileNames[parseInt(item['from'])],
+                        docx2: fileNames[parseInt(item['to'])],
+                        similar:item['similarity']
+                    })
+                }
+            }
+        )
+        return items;
+    }
+
+    function getDataAndShow() {
+        //console.log(userid_name_map)
+        let items = transformData();
+        fleshTable(items)
+    }
+
+
+    function init() {
+        initTable()
+        getDataAndShow()
+    }
+
+    init();
+</script>
+</html>
+
+

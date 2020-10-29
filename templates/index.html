@@ -16,11 +16,10 @@
     <!-- 引入主体模块样式文件 -->
     <link rel="stylesheet" href="/static/css/index.css">
     <!-- MQQ add -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
     <script src="https://cdn.staticfile.org/jquery/2.1.1/jquery.min.js"></script>
     <script type="text/javascript" charset="utf8"
             src="https://cdn.datatables.net/1.10.22/js/jquery.dataTables.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.css">
-
 
 </head>
 <body>
@@ -45,7 +44,7 @@
         <form method="post" enctype="multipart/form-data" action="/upload/">
             {% csrf_token %}
             <label>上传文件</label>
-            <input type="file" name="cmsfile" multiple="multiple" id="exampleFormControlFile1">
+            <input type="file" name="cmsFile" multiple="multiple" id="exampleFormControlFile1">
             <label>任务名</label>
             <input type="text" name="cmsTaskName" id="cmsTaskName">
             <button type="submit" class="busubmit">提交</button>
@@ -86,25 +85,57 @@
 
 <!-- 主题模块 -->
 <div class="w">
-    <div class="main" >
+    <div class="main">
         <h5>任务列表</h5>
-        <table  id="task_table">
-                <thead>
-                <tr>
-                    <th scope="col">任务号</th>
-                    <th scope="col">任务名</th>
-                    <th scope="col">任务提交时间</th>
-                    <th scope="col">任务完成时间</th>
-                    <th scope="col">运行状态</th>
-                </tr>
-                </thead>
-            </table>
+        <table id="task_table">
+            <thead>
+            <tr>
+                <th scope="col">任务号</th>
+                <th scope="col">任务名</th>
+                <th scope="col">任务提交时间</th>
+                <th scope="col">任务完成时间</th>
+                <th scope="col">运行状态</th>
+                <th scope="col">操作</th>
+            </tr>
+            </thead>
+        </table>
     </div>
 </div>
 </body>
 
 <script type="text/javascript">
 
+    let cmsTaskStatus = {
+        0: '创建，未运行',
+        1: '判断中',
+        2: '已完成'
+    }
+
+    function waitting() {
+        alert('请等待')
+    }
+
+    function runTask(cmsTaskId) {
+
+        let url = '/run/task';
+        $.ajax({
+            url: url,
+            data: {cmsTaskId: cmsTaskId},
+            type: "GET",
+            success: function (resp) {
+                console.log(resp)
+                alert('任务完成,请刷新页面查看结果')
+            }
+        })
+        alert('请求已发出')
+        //this.window.href = '/index'
+    }
+
+    function resultTask(cmsTaskId) {
+        // alert(cmsTaskId)
+        console.log('/result?cmsTaskId=' + cmsTaskId)
+        this.window.location.href = '/result?cmsTaskId=' + cmsTaskId
+    }
 
     function initTable() {
         $('#task_table').DataTable({
@@ -115,6 +146,19 @@
                     {data: 'cmsTaskStart'},
                     {data: 'cmsTaskFinish'},
                     {data: 'cmsTaskStatus'},
+                    {
+                        data: null,
+                        render: function (data, type, row, meta) {
+                            let html = "<button style='width: 65px;height: 20px; outline: 0' onclick=' runTask(" + row.cmsTaskId + ")  '> run </button>"
+                            console.log(row.cmsTaskStatus)
+                            if (row.cmsTaskStatus === cmsTaskStatus["1"]) {
+                                html = "<button style='width: 65px;height: 20px; outline: 0' onclick='waitting()'> waitting </button>"
+                            } else if (row.cmsTaskStatus === cmsTaskStatus["2"]) {
+                                html = "<button style='width: 65px;height: 20px; outline: 0' onclick='resultTask(" + row.cmsTaskId + ") '> result </button>"
+                            }
+                            return html
+                        }
+                    }
                 ],
             }
         );
@@ -132,6 +176,7 @@
         return local_time
     }
 
+
     function transformData(response) {
         let items = JSON.parse(response);
         let result_list = []
@@ -142,7 +187,7 @@
                     cmsTaskName: item.fields.cmsTaskName,
                     cmsTaskStart: item.fields.cmsTaskStart,
                     cmsTaskFinish: item.fields.cmsTaskFinish,
-                    cmsTaskStatus: item.fields.cmsTaskStatus
+                    cmsTaskStatus: cmsTaskStatus[parseInt(item.fields.cmsTaskStatus)]
                 }
                 result_list.push(result_item);
             }
