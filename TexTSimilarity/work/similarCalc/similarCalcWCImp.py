@@ -123,8 +123,6 @@ def similarCalcWCImp(cmsFilePath):
     for i in range(len(top_n_res)):
         for j in range(i + 1, len(top_n_res)):
             result = CalculateCos(top_n_res[i], top_n_res[j])
-            if (result >= 0.9):
-                print("result >= 0.9", docNameList[i], "与", docNameList[j], "相似")
             similarity.append({
                 'from': i,
                 'to': j,
