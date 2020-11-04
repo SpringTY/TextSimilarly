@@ -130,7 +130,6 @@ def similarCalcWCImp(cmsFilePath):
             })
     return docNameList, similarity
 
-
 if __name__ == '__main__':
     docNameList, similarity = similarCalcWCImp(
         'C:/Users/Administrator/Documents/workspace/python/TextSimilarly/upload_files/test')
