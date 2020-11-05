@@ -41,13 +41,13 @@
 <header class="header w">
     <!-- 上传模块 -->
     <div class="shangchuan">
-        <form method="post" enctype="multipart/form-data" action="/upload/">
+        <form id="taskForm" method="post" enctype="multipart/form-data"  action="/upload/">
             {% csrf_token %}
             <label>上传文件</label>
             <input type="file" name="cmsFile" multiple="multiple" id="exampleFormControlFile1">
             <label>任务名</label>
             <input type="text" name="cmsTaskName" id="cmsTaskName">
-            <button type="submit" class="busubmit">提交</button>
+            <button type="button" onclick="uploadTaskForm()" class="busubmit">提交</button>
         </form>
     </div>
     <!-- logo模块 -->
@@ -98,7 +98,10 @@
 </body>
 
 <script type="text/javascript">
-
+    function uploadTaskForm() {
+        $('#taskForm').submit()
+        alert('发出请求');
+    }
     let cmsTaskStatus = {
         0: '创建，未运行',
         1: '判断中',
@@ -118,7 +121,8 @@
             type: "GET",
             success: function (resp) {
                 console.log(resp)
-                alert('任务完成,请刷新页面查看结果')
+                alert('任务完成,请点击左侧任务查看结果')
+
             }
         })
         alert('请求已发出')
