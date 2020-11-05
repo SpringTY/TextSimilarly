@@ -3,15 +3,15 @@ from django.http import HttpResponse
 from django.views.decorators.http import require_POST, require_GET
 from TexTSimilarity.work.models.models import CMSFile, CMSTask, CMSResult
 from TexTSimilarity.work.similarCalc.similarCalc import similar
-from TexTSimilarity.work.utils.constValues import CMSTaskStatus
-import TexTSimilarity.work.mongo.resulltMongo as resulltMongo
-
+from TexTSimilarity.work.utils.constValues import CMSTaskStatus, CMSFileStatus
+from TexTSimilarity.work.redisTemplate import insert_one, query
+from TexTSimilarity.work.utils.fileUtils import del_file
 import json
 
 
 @require_GET
 def tasks(request):
-    cms_tasks = CMSTask.objects.all()
+    cms_tasks = CMSTask.objects.all().order_by('cmsTaskId')
     cms_tasks_json = serializers.serialize("json", cms_tasks)
     return HttpResponse(cms_tasks_json)
 
@@ -38,11 +38,14 @@ def runTask(request):
         'docNameList': docNameList,
         'similarity': similarity
     }
-    cmsResultMYSQL = CMSResult.create(cmsTaskId=cmsTaskId, cmsResultInfo='MongoDB')
+    cmsResultMYSQL = CMSResult.create(cmsTaskId=cmsTaskId, cmsResultInfo='redis')
     cmsResultMYSQL.save()
     cmsResultID = cmsResultMYSQL.cmsResultId
     cmsResultJSON = json.dumps(cmsResult)
-    resulltMongo.insert_one(cmsResultId=cmsResultID, cmsTaskId=cmsTaskId, cmsResultINFO=cmsResultJSON)
+    insert_one(cmsTaskId=cmsTaskId, cmsResultINFO=cmsResultJSON)
     cmsTask.cmsTaskStatus = CMSTaskStatus.FINISHED
+
     CMSTask.save(cmsTask)
+    del_file(cmsFiles.cmsFilePath)
+    CMSFile.objects.filter(cmsTaskId=cmsTaskId).update(cmsFileStatus=CMSFileStatus.DELETE)
     return HttpResponse('success')

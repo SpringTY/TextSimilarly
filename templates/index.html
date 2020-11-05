@@ -71,12 +71,6 @@
                     <li class="options">
                         <a href="/index">任务</a>
                     </li>
-                    <li class="options">
-                        <a href="#">检查结果</a>
-                    </li>
-                    <li class="options">
-                        <a href="#">重复率拓扑</a>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -140,6 +134,7 @@
     function initTable() {
         $('#task_table').DataTable({
                 orderMulti: true,
+                order: [[0, 'desc']],
                 columns: [
                     {data: 'cmsTaskId'},
                     {data: 'cmsTaskName'},
@@ -195,6 +190,8 @@
         return result_list;
     }
 
+    var testV = null;
+
     function getDataAndShow() {
         let url = '/tasks';
         $.ajax({
@@ -205,9 +202,10 @@
             success: function (resp) {
                 //console.log(userid_name_map)
                 console.log(resp)
+                testV = resp
                 let items = transformData(resp);
                 fleshTable(items)
-
+                fleshData()
             }
         })
     }

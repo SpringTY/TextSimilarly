@@ -1,12 +1,14 @@
 from TexTSimilarity.work.similarCalc.similarCalcWCImp import similarCalcWCImp
 import sys
-sys.path.append('C:/PyCharm/TextSimilarly/TexTSimilarity/work/similarCalc/tdidf_word')
-from tfidf_word import tfidf_word
+# sys.path.append('C:/PyCharm/TextSimilarly/TexTSimilarity/work/similarCalc/tdidf_word')
+from TexTSimilarity.work.similarCalc.similarCalcTFIDFImp import tfidf_word as similarCalcTFIDFImp
+
 similarCalc = {
-    'similarCalcWCImp': similarCalcWCImp, 'tfidf_word': tfidf_word
+    'similarCalcWCImp': similarCalcWCImp,
+    'similarCalcTFIDFImp': similarCalcTFIDFImp
 }
 
-DEFAULT_METHOD = 'similarCalcWCImp'
+DEFAULT_METHOD = 'similarCalcTFIDFImp'
 
 
 def similar(filePath, method=DEFAULT_METHOD):

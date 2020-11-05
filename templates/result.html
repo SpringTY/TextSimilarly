@@ -42,14 +42,23 @@
     <!-- 上传模块 -->
     <input id="cmsTaskId" hidden value="{{ cmsTaskId }}">
     <div class="shangchuan">
-        <form method="post" enctype="multipart/form-data" action="/upload/">
-            {% csrf_token %}
-            <label>上传文件</label>
-            <input type="file" name="cmsFile" multiple="multiple" id="exampleFormControlFile1">
-            <label>任务名</label>
-            <input type="text" name="cmsTaskName" id="cmsTaskName">
-            <button type="submit" class="busubmit">提交</button>
-        </form>
+        <label style="margin-left:40px;margin-top: 5px;margin-right:5px; font-size: 18px">阈值</label>
+        <input id="gate_value" type="text">
+        <button onclick="change_gate()">生成关系图</button>
+        <label style="margin-left:40px;margin-top: 5px;margin-right:5px; font-size: 18px">分度值</label>
+        <select id="margin_similar" style="width: 50px;height: 20px" onchange="fleshHistogram()">
+            <option value="5" selected>5</option>
+            <option value="10">10</option>
+            <option value="20">20</option>
+        </select>
+        {#        <form method="post" enctype="multipart/form-data" action="/upload/">#}
+        {#            {% csrf_token %}#}
+        {#            <label>上传文件</label>#}
+        {#            <input type="file" name="cmsFile" multiple="multiple" id="exampleFormControlFile1">#}
+        {#            <label>任务名</label>#}
+        {#            <input type="text" name="cmsTaskName" id="cmsTaskName">#}
+        {#            <button type="submit" class="busubmit">提交</button>#}
+        {#        </form>#}
     </div>
     <!-- logo模块 -->
     <div class="logo">
@@ -72,12 +81,6 @@
                     <li class="options">
                         <a href="/index">任务</a>
                     </li>
-                    <li class="options">
-                        <a href="#">检查结果</a>
-                    </li>
-                    <li class="options">
-                        <a href="#">重复率拓扑</a>
-                    </li>
                 </ul>
             </div>
         </div>
@@ -87,9 +90,12 @@
 <!-- 主题模块 -->
 <div class="w">
     <div class="main">
+        <h5>{{ cmsTask.cmsTaskName }}(id={{ cmsTask.cmsTaskId }})</h5>
+        <div id="histogram" style="height: 350px;margin-bottom: 20px"></div>
+        <div style="background: white;height:20px"></div>
         <div id="charts" style="height: 600px;margin-bottom: 20px"></div>
         <div style="background: white;height:20px"></div>
-        <h5>{{ cmsTask.cmsTaskName }}(id={{ cmsTask.cmsTaskId }})</h5>
+
         <div style="height: 100%;margin-bottom: 60px">
             <table id="task_table">
                 <thead>
@@ -120,11 +126,15 @@
             similarData = JSON.parse(resp)
         }
     })
-    let fileNames = similarData['docNameList']
-    let gate = 0.9
-    let similar = similarData['similarity']
-    var myChart = echarts.init(document.getElementById('charts'));
+    var gate = 0.1
+    $('#gate_value').val(gate)
+    var margin = $('#margin_similar').val()
 
+    let fileNames = similarData['docNameList']
+    let similar = similarData['similarity']
+
+    let myChart = echarts.init(document.getElementById('charts'));
+    let histogram = echarts.init(document.getElementById('histogram'));
     option = {
         title: {
             text: '拓扑图'
@@ -146,57 +156,10 @@
                 edgeLabel: {
                     fontSize: 20
                 },
-                data: [{
-                    name: '节点1',
-                    x: 300,
-                    y: 300
-                }, {
-                    name: '节点2',
-                    x: 800,
-                    y: 300
-                }, {
-                    name: '节点3',
-                    x: 550,
-                    y: 100
-                }, {
-                    name: '节点4',
-                    x: 550,
-                    y: 500
-                }],
+                data: [],
                 // links: [],
-                links: [{
-                    source: 0,
-                    target: 1,
-                    symbolSize: [5, 20],
-                    label: {
-                        show: true
-                    },
-                    lineStyle: {
-                        width: 5,
-                        curveness: 0.2
-                    }
-                }, {
-                    source: '节点2',
-                    target: '节点1',
-                    label: {
-                        show: true
-                    },
-                    lineStyle: {
-                        curveness: 0.2
-                    }
-                }, {
-                    source: '节点1',
-                    target: '节点3'
-                }, {
-                    source: '节点2',
-                    target: '节点3'
-                }, {
-                    source: '节点2',
-                    target: '节点4'
-                }, {
-                    source: '节点1',
-                    target: '节点4'
-                }],
+                links: []
+                ,
                 lineStyle: {
                     opacity: 0.9,
                     width: 2,
@@ -213,6 +176,7 @@
         1: '判断中',
         2: '已完成'
     }
+
     function initTable() {
         $('#task_table').DataTable({
                 orderMulti: true,
@@ -225,6 +189,18 @@
         );
     }
 
+    function change_gate() {
+        let cur_gate_value = $('#gate_value').val()
+        cur_gate_value = parseFloat(cur_gate_value)
+        if (cur_gate_value > 1 && cur_gate_value < 0) {
+            alert('Gate Input Error')
+        } else {
+            gate = cur_gate_value
+            fleshData()
+        }
+
+    }
+
     function fleshTable(cur_data) {
         let table = $('#task_table').DataTable();
         table.clear();
@@ -233,31 +209,176 @@
     }
 
     function transformData() {
-        let items = []
+        let cur_similar = []
+        // 过滤掉不在gate范围之内的
         similar.forEach(
             (item) => {
-                if (parseFloat(item['similarity']) >= gate) {
-                    items.push({
+                if (parseFloat(item['similarity']) >= parseFloat(gate)) {
+                    cur_similar.push({
                         docx1: fileNames[parseInt(item['from'])],
                         docx2: fileNames[parseInt(item['to'])],
-                        similar:item['similarity']
+                        similar: item['similarity']
                     })
                 }
             }
         )
-        return items;
+        return cur_similar;
     }
 
-    function getDataAndShow() {
-        //console.log(userid_name_map)
-        let items = transformData();
-        fleshTable(items)
+    function fleshRelateShipGraph(cur_data) {
+        myChart.showLoading()
+        let visit = {}
+        let cur_list = []
+        cur_data.forEach((item) => {
+            if (visit[item.docx1] == null) {
+                cur_list.push(item.docx1)
+                visit[item.docx1] = 1
+            }
+            if (visit[item.docx2] == null) {
+                cur_list.push(item.docx2)
+                visit[item.docx2] = 2
+            }
+        })
+        let X = 300;
+        let WidthMargin = 10;
+        let TopY = 300;
+        let BottomY = 310;
+        let point_list = []
+        cur_list.forEach(
+            (item, index) => {
+                point_list.push({
+                    name: 'top_' + item,
+                    x: X + index * WidthMargin,
+                    y: TopY
+                })
+                point_list.push({
+                    name: 'bot_' + item,
+                    x: X + index * WidthMargin,
+                    y: BottomY
+                })
+            }
+        )
+        let link_list = []
+        cur_data.forEach(
+            (item) => {
+                link_list.push({
+                    source: 'top_' + item.docx1,
+                    target: 'bot_' + item.docx2
+                })
+                link_list.push({
+                    source: 'top_' + item.docx2,
+                    target: 'bot_' + item.docx1
+                })
+            })
+        option = {
+            title: {
+                text: '拓扑图'
+            },
+            tooltip: {},
+            animationDurationUpdate: 1500,
+            animationEasingUpdate: 'quinticInOut',
+            series: [
+                {
+                    type: 'graph',
+                    layout: 'none',
+                    symbolSize: 30,
+                    roam: true,
+                    label: {
+                        show: false
+                    },
+                    edgeSymbol: ['circle'],
+                    edgeSymbolSize: [4, 10],
+                    edgeLabel: {
+                        fontSize: 20
+                    },
+                    data: point_list,
+                    // links: [],
+                    links: link_list,
+                    lineStyle: {
+                        opacity: 0.9,
+                        width: 2,
+                        curveness: 0
+                    }
+                }
+            ]
+        };
+        myChart.setOption(option, true)
     }
 
+    function fleshData() {
+        let cur_similar = transformData()
+        fleshTable(cur_similar)
+        fleshRelateShipGraph(cur_similar)
+    }
+
+
+    {#function getDataAndShow() {#}
+    {#    //console.log(userid_name_map)#}
+    {#    let items = transformData();#}
+    {#    fleshTable(items)#}
+
+    function fleshHistogram() {
+        margin = parseInt($('#margin_similar').val())
+        console.log(margin)
+        let x_list = []
+        let y_list = []
+        for (let i = 0; i < 100; i = i + margin) {
+            x_list.push(i)
+            y_list.push(0)
+        }
+        console.log(y_list)
+        similar.forEach((item) => {
+            let index = parseFloat(item['similarity']) * 100 / parseFloat(margin) - 0.0001
+            if (index > 0) {
+                index = parseInt(index)
+            } else {
+                index = 0
+            }
+            y_list[index]++
+        })
+        for (let i = 0; i < y_list.length; i++) {
+            y_list[i] = parseFloat(y_list[i]) / parseFloat(similar.length)
+            y_list[i] = y_list[i].toFixed(2)
+        }
+        option = {
+            xAxis: {
+                type: 'category',
+                data: x_list
+            },
+            yAxis: {
+                type: 'value'
+            },
+            series: [{
+                data: y_list,
+                type: 'bar',
+                showBackground: true,
+                backgroundStyle: {
+                    color: 'rgba(220, 220, 220, 0.8)'
+                },
+                itemStyle: {
+                    normal: {
+                        label: {
+                            show: true, //开启显示
+                            position: 'top', //在上方显示
+                            textStyle: { //数值样式
+                                color: 'black',
+                                fontSize: 16
+                            }
+                        }
+                    }
+                }
+            }]
+        };
+
+        histogram.setOption(option, true)
+        myChart.hideLoading();
+
+    }
 
     function init() {
         initTable()
-        getDataAndShow()
+        fleshData()
+        fleshHistogram()
     }
 
     init();

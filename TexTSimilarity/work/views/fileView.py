@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST, require_GET
 from TexTSimilarity.work.models.models import CMSFile, CMSTask, CMSResult
 from django.core.files.storage import default_storage
 from TexTSimilarity.work.utils.constValues import *
+from django.shortcuts import render
 
 
 @require_GET
@@ -47,7 +48,7 @@ def upload(request):
             cmsFile = CMSFile.create(cmsFileName=cmsRequestFile.name, cmsFilePath=cmsFilePath, cmsTaskId=cmsTaskId,
                                      cmsFileStatus=CMSFileStatus.ON_DISK)
             cmsFile.save()
-        responseMSG = 'success'
+        responseMSG = render(request, 'index.html')
     else:
-        responseMSG = 'failed'
-    return HttpResponse(responseMSG)
+        responseMSG = HttpResponse('failed')
+    return responseMSG
