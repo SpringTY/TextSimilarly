@@ -7,8 +7,16 @@ from django.core.files.storage import default_storage
 from TexTSimilarity.work.utils.constValues import *
 from TexTSimilarity.work.redisTemplate import query
 
+'''
+接收结果的ajax请求
+'''
+
+
 def resultInfo(request):
+    """
+    :param request: GET请求,带有cmsTaskId参数
+    :return: 根据cmsTaskId获取对应的结果返回
+    """
     cmsTaskId = request.GET.get('cmsTaskId')
-    print('test')
     cmsResultInfo = query(cmsTaskId)
     return HttpResponse(cmsResultInfo)

@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from TexTSimilarity.work.views import router, fileView
-from .views import taskView, resultView
+from TexTSimilarity.work.views import taskView, resultView
 
 urlpatterns = [
     path('', router.index, name='index_base'),

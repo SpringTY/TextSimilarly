@@ -13,4 +13,4 @@ import django.core.asgi
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'TexTSimilarity.settings')
 
-application = get_asgi_application()
+application = django.get_asgi_application()

@@ -33,14 +33,21 @@ def files(request):
 
 @require_POST
 def upload(request):
+    """
+    批量上传文件并生成任务
+    :param request:
+    :return:
+    """
     if request.FILES is not None:
+        # 获取任务名
         cmsTaskName = request.POST.get('cmsTaskName')
-
+        # 生成新的任务
         cmsTask = CMSTask.create(cmsTaskName=cmsTaskName, cmsTaskStatus=CMSTaskStatus.CREATED)
         cmsTask.save()
+        # 获取生成的任务信息
         cmsTaskId = cmsTask.cmsTaskId
         cmsTaskStart = cmsTask.cmsTaskStart
-
+        # 处理每一个文件
         for cmsRequestFile in request.FILES.getlist('cmsFile'):
             cmsFilePath = FILE_PATH_PREFIX + str(cmsTaskStart.strftime('%Y-%m-%d-%H-%M-%S')) + '/'
             print(cmsFilePath)

@@ -1,7 +1,7 @@
 import redis
 
-HOST = '47.98.177.164'
-PASSWORD = 'MengQingQiang123'
+HOST = '202.205.99.174'
+PASSWORD = 'TongYang123'
 DATABASE = 0
 PORT = '6379'
 
